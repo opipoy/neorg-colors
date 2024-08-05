@@ -1,7 +1,7 @@
 # neorg colors
 this is a module for neorg that allows for changing the text color
 ## syntax
-for now the syntax of the module is pretty simple and is limited by lines (it cam color only lines):
+for now the syntax of the module is pretty simple and is limited by lines (it can color only lines):
 ### changing the color on current line
 ```
 @color:<hex color> <your text>
