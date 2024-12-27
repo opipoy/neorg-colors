@@ -36,7 +36,7 @@ module.private = {
         -- finding the &color property and adding the hex color itself
         local start_idx, end_idx = string.find(line_txt, what)
         -- concealing the &color property
-        print(ns_id)
+        -- print(ns_id)
         vim.api.nvim_buf_set_extmark(buf, ns_id, line_num - 1,
             start_offset + start_idx-1,
             {
