@@ -13,7 +13,10 @@ module.private = {
         -- create a spetial highlight for each color
         vim.api.nvim_command('highlight ColorHighlightForColor-' .. tostring(color) .. ' guifg=#' .. color)
         -- set the highlight on the current buffer
-        vim.api.nvim_buf_add_highlight(buf, -1, "ColorHighlightForColor-" .. tostring(color), line_num - 1, 0, -1)
+        vim.hl.range(buf, ns_id, highlight_name,
+                            {line_num - 1, 0},
+                            {line_num - 1, -1}
+                      )
     end,
 
     color_in_line = function(color, buf, line_num, start_offset, end_offset)
@@ -22,8 +25,10 @@ module.private = {
         -- create a spetial highlight for each color
         vim.api.nvim_command('highlight ColorHighlightForColor-' .. tostring(color) .. ' guifg=#' .. color)
         -- set the highlight on the current buffer
-        vim.api.nvim_buf_add_highlight(buf, -1, "ColorHighlightForColor-" .. tostring(color), line_num - 1,
-            start_offset, end_offset)
+        vim.hl.range(buf, ns_id, highlight_name,
+                            {line_num - 1, start_offset},
+                            {line_num - 1, end_offset}
+        )
     end,
 
     conceal_on_line = function(what, buf, line_num, line_txt, offset, start_offset, ns_id)
