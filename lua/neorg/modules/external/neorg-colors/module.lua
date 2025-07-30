@@ -120,11 +120,12 @@ module.private = {
 
         local COLOR_NAME = module.config.public.color_name
         local END_NAME = module.config.public.end_name
-        local COLOR_LEN = string.len(COLOR_NAME)
-        local END_LEN = string.len(END_NAME)
+        -- it will be added to the next line recorsion
+        local exta_col_len = 0
 
         -- case mach all current possibilities (see if they exsist)
         local start_coloring = string.match(line, COLOR_NAME .. "#(%x%x%x%x%x%x)")
+        local start_highlighting = string.match(line, COLOR_NAME .. "[#%x%x%x%x%x%x]+,#(%x%x%x%x%x%x)")
         local end_coloring = string.match(line, END_NAME)
         if (offset == 0) then
             vim.api.nvim_buf_clear_namespace(buf,ns_id,line_number, line_number+1)
@@ -132,10 +133,22 @@ module.private = {
 
         -- set the line color if &color
         if start_coloring then
+            exta_col_len = string.len(COLOR_NAME)
 
             -- set coloring = true and the color
             coloring[1] = true
             coloring[2] = start_coloring
+
+            -- set highlight and set highlighting to true
+            -- NOTE: color[3] and color[4] is for highlighing
+
+            if start_highlighting then
+                exta_col_len = exta_col_len + 8
+                coloring[3] = true
+                coloring[4] = start_highlighting
+            else
+                coloring[3] = false
+                coloring[4] = ""
             end
             local color_start_idx, color_end_idx = string.find(line, COLOR_NAME, 0)
 
@@ -220,6 +233,7 @@ module.private = {
         local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
         local coloring = {
             false, "ffffff",                 -- text color
+            false, "000000"                  -- highlight color
         }
         local continue = false
         -- Iterate over each line
