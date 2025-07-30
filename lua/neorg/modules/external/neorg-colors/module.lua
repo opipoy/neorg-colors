@@ -101,6 +101,7 @@ module.private = {
         if not line_num or not buf then
             return false
         end
+        vim.api.nvim_buf_clear_namespace(0, ns_id, line_num, line_num)
         -- finding the &color property and adding the hex color itself
         vim.api.nvim_buf_set_extmark(buf, ns_id, line_num - 1,
             start_offset ,
@@ -110,14 +111,13 @@ module.private = {
                 conceal = ""
             })
     end,
-    scan_line_and_update = function(buf, line, line_number, coloring, offset, continue)
+    scan_line_and_update = function(buf, line, line_number, coloring, offset, continue, ns_id)
         -- NOTE: this is a recursive function, it will call itself in current line until it stopped coloring
         --       it will cut the line when it doesnt find a match
         --       returns: coloring
 
         -- some constants
-        -- Add a highlight for the entire line
-        local ns_id = vim.api.nvim_create_namespace('set_color_namespace')
+
         local COLOR_NAME = module.config.public.color_name
         local END_NAME = module.config.public.end_name
         local COLOR_LEN = string.len(COLOR_NAME)
@@ -126,6 +126,10 @@ module.private = {
         -- case mach all current possibilities (see if they exsist)
         local start_coloring = string.match(line, COLOR_NAME .. "#(%x%x%x%x%x%x)")
         local end_coloring = string.match(line, END_NAME)
+        if (offset == 0) then
+            vim.api.nvim_buf_clear_namespace(buf,ns_id,line_number, line_number+1)
+        end
+
         -- set the line color if &color
         if start_coloring then
 
@@ -148,7 +152,13 @@ module.private = {
                     line_number,
                     coloring,
                     offset + color_end_idx-1,
-                    continue)
+                    continue,
+                    ns_id
+                )
+                -- lookes like that:
+                -- if i have a &color:#ffffff property
+                -- offset will be now 11(length till the &color)+7(length of &color:) = 18
+                -- and the text will look like that: ffffff property
             end
 
             -- if theres an &end_color tag in the future call the function again with the string cut till the end of the &color
@@ -158,21 +168,22 @@ module.private = {
                 local end_start_idx, end_end_idx = string.find(line, END_NAME, 0)
 
                 module.private.color_in_line(module.private.get_colors_from_coloring(coloring)
-                                , buf, line_number, color_end_idx + offset, offset + end_start_idx-1)
+                                , buf, line_number, color_end_idx + offset, offset + end_start_idx-1, ns_id)
                 return call_itself()
             else
                 -- find the next &color to know where to start next
                 local next_color_start_idx, next_color_end_idx = string.find(string.sub(line, color_end_idx + 0),
                     COLOR_NAME, 0)
                 if (next_color_end_idx == nil or next_color_start_idx == nil) then
-                    module.private.color_in_line(module.private.get_colors_from_coloring(coloring), buf, line_number, color_end_idx + offset, -1)
+                    module.private.color_in_line(module.private.get_colors_from_coloring(coloring), buf, line_number, color_end_idx + offset, -1, ns_id)
                     continue = true
                     return call_itself()
                 else
                     -- color until next color
                     module.private.color_in_line(module.private.get_colors_from_coloring(coloring), buf, line_number,
                         color_end_idx + offset,                              -- starting from this color
-                        offset + next_color_end_idx                          -- till the next color that has been found
+                        offset + next_color_end_idx,                          -- till the next color that has been found
+                        ns_id
                     )
                     continue = true
                     return call_itself()
@@ -181,10 +192,10 @@ module.private = {
         elseif end_coloring then
             local start_idx, end_idx = string.find(line, END_NAME)
             module.private.conceal_on_line(buf, line_number, start_idx + offset-1,
-            end_idx+offset + exta_col_len -- color_end_idx is the last letter in the &color: property in the line
+            end_idx+offset + exta_col_len, -- color_end_idx is the last letter in the &color: property in the line
                                                  -- offset is the offset that the line starts from
                                                  -- exta_col_len is the added hex color to the &color
-            )
+            ns_id)
             coloring[1] = false
             coloring[2] = "000000"
             if (start_coloring) then
@@ -196,7 +207,7 @@ module.private = {
         else
             continue = true
             if (coloring[1]) then
-                module.private.color_in_line(module.private.get_colors_from_coloring(coloring), buf, line_number, offset, -1)
+                module.private.color_in_line(module.private.get_colors_from_coloring(coloring), buf, line_number, offset, -1, ns_id)
             end
         end
         return continue, coloring
@@ -205,6 +216,7 @@ module.private = {
 
     scan_lines_and_update = function(buf)
         -- Get the lines in the buffer
+        local ns_id = vim.api.nvim_create_namespace('neorg-colors-namespace')
         local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
         local coloring = {
             false, "ffffff",                 -- text color
@@ -216,12 +228,12 @@ module.private = {
             -- NOTE: i think this can conflict with other plugins
             -- mabe i need to try and find another solution
             --             vim.api.nvim_buf_clear_namespace(buf, -1, line_number, line_number + 1)
-            continue, coloring = module.private.scan_line_and_update(buf, line, line_number, coloring, 0, continue)
+            continue, coloring = module.private.scan_line_and_update(buf, line, line_number, coloring, 0, continue, ns_id)
             if coloring[1] then
                 if continue then
                     continue = false
                 else
-                    module.private.color_line(module.private.get_colors_from_coloring(coloring), buf, line_number)
+                    module.private.color_line(module.private.get_colors_from_coloring(coloring), buf, line_number, ns_id)
                 end
             end
         end
