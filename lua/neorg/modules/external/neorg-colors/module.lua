@@ -3,8 +3,8 @@ local neorg = require('neorg.core')
 local module = neorg.modules.create('external.neorg-colors')
 
 module.config.public = {
-        color_name = "&color:",
-        end_name = "&end_color"
+    color_name = "&color:",
+    end_name = "&end_color"
 }
 
 module.private = {
@@ -58,7 +58,7 @@ module.private = {
         local COLOR_LEN = string.len(COLOR_NAME)
         local END_LEN = string.len(END_NAME)
 
-        -- case mach all current possibilities
+        -- case mach all current possibilities (see if they exsist)
         local start_coloring = string.match(line, COLOR_NAME .. "#(%x%x%x%x%x%x)")
         local end_coloring = string.match(line, END_NAME)
         -- set the line color if &color
@@ -77,6 +77,7 @@ module.private = {
                 return module.private.scan_line_and_update(buf, string.sub(line, color_end_idx + COLOR_LEN+1), line_number,
                     coloring, offset + color_end_idx + COLOR_LEN, continue)
             end
+
             -- if theres an &end_color tag in the future call the function again with the string cut till the end of the &color
             if (end_coloring) then
                 -- find the &color property
