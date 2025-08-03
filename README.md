@@ -35,3 +35,16 @@ nend_color
 this is now regular text. it lookes normal
 ```
 
+### using highlights to color the text 
+```norg
+ncolor:hex color,highlight color
+this text is highlighted & colored :)
+nend_color
+```
+#### example
+```norg
+ncolor:#ffffff,#000000
+this text is white with a black background
+ncolor:#ff0000,#0000ff
+this text is red with a blue background
+nend_color
