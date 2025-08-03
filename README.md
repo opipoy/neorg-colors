@@ -4,33 +4,34 @@ this is a module for neorg that allows for changing the text color
 ## syntax
 for now the syntax of the module is pretty simple and is limited by lines (it can color only lines):
 #### example:
+```norg
+ncolor:#ff0000 this text color is now red! nend_color
 ```
-&color:#ff0000 this text color is now red! &end_color
 
-```
 ### changing the color inside the text
 ```
-<your text>&color:<hex color> <some colored text> &end_color
+<your text>ncolor:<hex color> <some colored text> nend_color
 ```
 #### example:
 ```
-this is an example with &color:#ff0000 colored &end_color text
+this is an example with ncolor:#ff0000 colored nend_color text
 ```
+
 ### changing the color on multible lines
-```
-&color:<hex color>
+```norg
+ncolor:<hex color>
 <your text on diffrent lines>
-&end_color
+nend_color
 ```
 #### example:
 ```
-&color:#ffffff
+ncolor:#ffffff
 this text is now white
 and this one is also white
-&color:#0000ff
+ncolor:#0000ff
 this text is now blue
 this one is also blue
-&end_color
+nend_color
 this is now regular text. it lookes normal
 ```
 

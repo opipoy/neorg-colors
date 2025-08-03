@@ -2,12 +2,32 @@ local neorg = require('neorg.core')
 
 local module = neorg.modules.create('external.neorg-colors')
 
+local api = vim.api
+
 module.config.public = {
-    color_name = "&color:",
-    end_name = "&end_color"
+    color_name = "ncolor:",
+    end_name = "nend_color"
 }
 
 module.private = {
+    -- credit: @bucdany
+    escape_lua_pattern = function (s)
+        local matches = {
+            ["^"] = "%^",
+            ["$"] = "%$",
+            ["("] = "%(",
+            [")"] = "%)",
+            ["%"] = "%%",
+            ["."] = "%.",
+            ["["] = "%[",
+            ["]"] = "%]",
+            ["*"] = "%*",
+            ["+"] = "%+",
+            ["-"] = "%-",
+            ["?"] = "%?",
+        }
+        return (s:gsub(".", matches))
+    end,
 
     get_colors_from_coloring = function (coloring)
 
@@ -41,7 +61,7 @@ module.private = {
         if colors[2] ~= "" then
             command = command .. ' guibg=#' .. colors[2]
         end
-        vim.api.nvim_command(command)
+        api.nvim_command(command)
         -- set the highlight on the current buffer
         vim.hl.range(buf, ns_id, highlight_name,
                             {line_num - 1, 0},
@@ -81,7 +101,7 @@ module.private = {
         end
 
         
-        vim.api.nvim_command(command)
+        api.nvim_command(command)
         -- set the highlight on the current buffer
         vim.hl.range(buf, ns_id, highlight_name,
                             {line_num - 1, start_offset},
@@ -101,9 +121,8 @@ module.private = {
         if not line_num or not buf then
             return false
         end
-        vim.api.nvim_buf_clear_namespace(0, ns_id, line_num, line_num)
-        -- finding the &color property and adding the hex color itself
-        vim.api.nvim_buf_set_extmark(buf, ns_id, line_num - 1,
+        -- hiding the specified area
+        api.nvim_buf_set_extmark(buf, ns_id, line_num - 1,
             start_offset ,
             {
                 end_line = line_num - 1,
@@ -119,7 +138,10 @@ module.private = {
         -- some constants
 
         local COLOR_NAME = module.config.public.color_name
+        COLOR_NAME = module.private.escape_lua_pattern(COLOR_NAME)
         local END_NAME = module.config.public.end_name
+        END_NAME = module.private.escape_lua_pattern(END_NAME)
+
         -- it will be added to the next line recorsion
         local exta_col_len = 0
 
@@ -128,7 +150,7 @@ module.private = {
         local start_highlighting = string.match(line, COLOR_NAME .. "[#%x%x%x%x%x%x]+,#(%x%x%x%x%x%x)")
         local end_coloring = string.match(line, END_NAME)
         if (offset == 0) then
-            vim.api.nvim_buf_clear_namespace(buf,ns_id,line_number, line_number+1)
+            api.nvim_buf_clear_namespace(buf,ns_id,line_number, line_number+1)
         end
 
         -- set the line color if &color
@@ -229,8 +251,8 @@ module.private = {
 
     scan_lines_and_update = function(buf)
         -- Get the lines in the buffer
-        local ns_id = vim.api.nvim_create_namespace('neorg-colors-namespace')
-        local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+        local ns_id = api.nvim_create_namespace('neorg-colors-namespace')
+        local lines = api.nvim_buf_get_lines(buf, 0, -1, false)
         local coloring = {
             false, "ffffff",                 -- text color
             false, "000000"                  -- highlight color
@@ -241,7 +263,6 @@ module.private = {
             -- if the line does not contain the all other color properties remove its namespace
             -- NOTE: i think this can conflict with other plugins
             -- mabe i need to try and find another solution
-            --             vim.api.nvim_buf_clear_namespace(buf, -1, line_number, line_number + 1)
             continue, coloring = module.private.scan_line_and_update(buf, line, line_number, coloring, 0, continue, ns_id)
             if coloring[1] then
                 if continue then
@@ -256,19 +277,19 @@ module.private = {
 
 module.load = function()
     -- Get the current buffer
-    local buf = vim.api.nvim_get_current_buf()
+    local buf = api.nvim_get_current_buf()
     -- update the buffer on entering a new page
-    vim.api.nvim_create_autocmd({ "BufEnter", "BufNew", "TextChanged", "TextChangedI"  }, {
+    api.nvim_create_autocmd({ "BufEnter", "BufNew", "TextChanged", "TextChangedI"  }, {
         pattern = { "*.norg" },
         callback = function()
             module.private.scan_lines_and_update(buf)
         end
     })
-    vim.api.nvim_create_autocmd({"BufEnter", "BufNew"}, {
+    api.nvim_create_autocmd({"BufEnter", "BufNew"}, {
         pattern = { "*.norg" },
         callback = function ()
             -- update the buffer
-            buf = vim.api.nvim_get_current_buf();
+            buf = api.nvim_get_current_buf();
         end
     })
 end
