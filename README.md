@@ -1,7 +1,31 @@
-# neorg colors
-### **NOTE** this is an expiramental branch some changes may preduce bugs
+# 🎨 neorg colors
+
+### 📝 **NOTE** this is an expiramental branch some changes may preduce bugs
 this is a module for neorg that allows for changing the text color
-## syntax
+
+## 💾 Installation
+### Requirements
+only a working Neorg installation
+### adding the plugin to your setup
+<detailes>
+<summery>lazy.nvim<\summery>
+```lua
+-- neorg.lua or where you placed your neorg installation in nvim
+{
+    "nvim-neorg/neorg",
+    lazy = false,
+    version = "*",
+    config = true,
+    dependencies = {
+        -- all your other dependencies
+        { "opipoy/neorg-colors" }
+    }
+}
+```
+<\detailes>
+
+
+## 🧑‍💻 syntax
 for now the syntax of the module is pretty simple and is limited by lines (it can color only lines):
 #### example:
 ```norg
@@ -48,3 +72,19 @@ this text is white with a black background
 ncolor:#ff0000,#0000ff
 this text is red with a blue background
 nend_color
+```
+
+## ⚙️ Configre
+### custom color names
+you can add custom names to your choosing:
+```lua
+["external.neorg-colors"] = {
+    config = {
+        color_name = "<your color name>"
+        end_name = "<your end color name>"
+    }
+}
+```
+#### ❗Notice❗:
+some characters may conflict with neorgs syntax.
+please check documentation to see if theres a conflict
