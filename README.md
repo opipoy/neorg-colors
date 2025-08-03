@@ -27,7 +27,7 @@ only a working Neorg installation
 
 
 ## 🧑‍💻 syntax
-for now the syntax of the module is pretty simple and is limited by lines (it can color only lines):
+### ❗Notice: Syntax Change❗
 #### example:
 ```norg
 ncolor:#ff0000 this text color is now red! nend_color
