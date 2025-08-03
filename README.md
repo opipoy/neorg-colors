@@ -7,8 +7,9 @@ this is a module for neorg that allows for changing the text color
 ### Requirements
 only a working Neorg installation
 ### adding the plugin to your setup
-<detailes>
-<summery>lazy.nvim<\summery>
+<details>
+    <summary>lazy.nvim</summary>
+
 ```lua
 -- neorg.lua or where you placed your neorg installation in nvim
 {
@@ -22,7 +23,7 @@ only a working Neorg installation
     }
 }
 ```
-<\detailes>
+</details>
 
 
 ## 🧑‍💻 syntax
