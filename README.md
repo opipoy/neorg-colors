@@ -1,12 +1,12 @@
-# 🎨 neorg colors
+# 🎨 Neorg Colors
 
-### 📝 **NOTE** this is an expiramental branch some changes may preduce bugs
-this is a module for neorg that allows for changing the text color
+### 📝 **NOTE** this is an experimental branch, some changes may produce bugs
+This is a module for neorg that allows you to change the text color
 
 ## 💾 Installation
 ### Requirements
-only a working Neorg installation
-### adding the plugin to your setup
+Only a working Neorg installation
+### Adding the plugin to your setup
 <details>
     <summary>lazy.nvim</summary>
 
@@ -26,29 +26,29 @@ only a working Neorg installation
 </details>
 
 
-## 🧑‍💻 syntax
+## 🧑‍💻 Syntax
 ### ❗Notice: Syntax Change❗
-#### example:
+#### Example
 ```norg
 ncolor:#ff0000 this text color is now red! nend_color
 ```
 
-### changing the color inside the text
+### Changing the color inside the text
 ```
 <your text>ncolor:<hex color> <some colored text> nend_color
 ```
-#### example:
+#### Example
 ```
 this is an example with ncolor:#ff0000 colored nend_color text
 ```
 
-### changing the color on multible lines
+### Changing the color on multiple lines
 ```norg
 ncolor:<hex color>
-<your text on diffrent lines>
+<your text on different lines>
 nend_color
 ```
-#### example:
+#### Example
 ```
 ncolor:#ffffff
 this text is now white
@@ -57,16 +57,16 @@ ncolor:#0000ff
 this text is now blue
 this one is also blue
 nend_color
-this is now regular text. it lookes normal
+this is now regular text. it looks normal
 ```
 
-### using highlights to color the text 
+### Using highlights to color the text 
 ```norg
 ncolor:hex color,highlight color
 this text is highlighted & colored :)
 nend_color
 ```
-#### example
+#### Example
 ```norg
 ncolor:#ffffff,#000000
 this text is white with a black background
@@ -75,9 +75,9 @@ this text is red with a blue background
 nend_color
 ```
 
-## ⚙️ Configre
-### custom color names
-you can add custom names to your choosing:
+## ⚙️ Configure
+### Custom color names
+You can add custom names to your choosing:
 ```lua
 ["external.neorg-colors"] = {
     config = {
@@ -86,6 +86,6 @@ you can add custom names to your choosing:
     }
 }
 ```
-#### ❗Notice❗:
-some characters may conflict with neorgs syntax.
-please check documentation to see if theres a conflict
+#### ❗Notice❗
+Some characters may conflict with Neorg's syntax.
+Please check the documentation to see if there's a conflict
