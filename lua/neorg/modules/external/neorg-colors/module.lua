@@ -1,12 +1,15 @@
+
 local neorg = require "neorg.core"
 
 local module = neorg.modules.create "external.neorg-colors"
+
 
 local api = vim.api
 
 module.config.public = {
   color_name = "ncolor:",
   end_name = "nend_color",
+
 }
 
 module.private = {
@@ -221,12 +224,14 @@ module.private = {
           return call_itself()
         else
           -- color until next color
+
           module.private.color_in_line(
             module.private.get_colors_from_coloring(coloring),
             buf,
             line_number,
             color_end_idx + offset, -- starting from this color
             offset + next_color_end_idx, -- till the next color that has been found
+
             ns_id
           )
           continue = true
@@ -235,6 +240,7 @@ module.private = {
       end
     elseif end_coloring then
       local start_idx, end_idx = string.find(line, END_NAME)
+
       module.private.conceal_on_line(
         buf,
         line_number,
@@ -255,10 +261,12 @@ module.private = {
           coloring,
           offset + end_idx
         )
+
       end
       -- if theres an &color: tag in the future call the function again with the string cut till the end of the &end_color
     else
       continue = true
+
       if coloring[1] then
         module.private.color_in_line(
           module.private.get_colors_from_coloring(coloring),
@@ -277,10 +285,9 @@ module.private = {
     -- Get the lines in the buffer
     local lines = api.nvim_buf_get_lines(buf, 0, -1, false)
     local coloring = {
-      false,
-      "ffffff", -- text color
-      false,
-      "000000", -- highlight color
+      false, "ffffff",       -- text color
+      false, "000000"        -- highlight color
+
     }
     local continue = false
     -- Iterate over each line
@@ -297,7 +304,9 @@ module.private = {
         end
       end
     end
+
   end,
+
 }
 
 module.load = function()
@@ -308,14 +317,18 @@ module.load = function()
     pattern = { "*.norg" },
     callback = function()
       module.private.scan_lines_and_update(buf)
+
     end,
+
   })
   api.nvim_create_autocmd({ "BufEnter", "BufNew" }, {
     pattern = { "*.norg" },
     callback = function()
       -- update the buffer
+
       buf = api.nvim_get_current_buf()
     end,
+
   })
 end
 
