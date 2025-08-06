@@ -312,23 +312,15 @@ module.private = {
 module.load = function()
   -- Get the current buffer
   local buf = api.nvim_get_current_buf()
+  -- create the ns_id
+  local ns_id = api.nvim_create_namespace("neorg-color")
   -- update the buffer on entering a new page
-  api.nvim_create_autocmd({ "BufEnter", "BufNew", "TextChanged", "TextChangedI" }, {
+  api.nvim_create_autocmd({"BufEnter", "BufNew", "TextChanged", "TextChangedI" }, {
     pattern = { "*.norg" },
     callback = function()
-      module.private.scan_lines_and_update(buf)
-
-    end,
-
-  })
-  api.nvim_create_autocmd({ "BufEnter", "BufNew" }, {
-    pattern = { "*.norg" },
-    callback = function()
-      -- update the buffer
-
       buf = api.nvim_get_current_buf()
+      module.private.scan_lines_and_update(buf, ns_id)
     end,
-
   })
 end
 
