@@ -1,15 +1,12 @@
-
 local neorg = require "neorg.core"
 
 local module = neorg.modules.create "external.neorg-colors"
-
 
 local api = vim.api
 
 module.config.public = {
   color_name = "ncolor:",
   end_name = "nend_color",
-
 }
 
 module.private = {
@@ -261,7 +258,6 @@ module.private = {
           coloring,
           offset + end_idx
         )
-
       end
       -- if theres an &color: tag in the future call the function again with the string cut till the end of the &end_color
     else
@@ -285,9 +281,10 @@ module.private = {
     -- Get the lines in the buffer
     local lines = api.nvim_buf_get_lines(buf, 0, -1, false)
     local coloring = {
-      false, "ffffff",       -- text color
-      false, "000000"        -- highlight color
-
+      false,
+      "ffffff", -- text color
+      false,
+      "000000", -- highlight color
     }
     local continue = false
     -- Iterate over each line
@@ -304,9 +301,7 @@ module.private = {
         end
       end
     end
-
   end,
-
 }
 
 module.load = function()
