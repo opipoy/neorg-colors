@@ -1,15 +1,12 @@
-
 local neorg = require "neorg.core"
 
 local module = neorg.modules.create "external.neorg-colors"
-
 
 local api = vim.api
 
 module.config.public = {
   color_name = "ncolor:",
   end_name = "nend_color",
-
 }
 
 module.private = {
@@ -42,31 +39,31 @@ module.private = {
     return { color, highlight }
   end,
 
-  -- a function made to color a hole line
+  -- A function created to color a whole line
   color_line = function(colors, buf, line_num, ns_id)
     -- colors structure:
     -- {
     -- color , highlight color
     -- }
-    -- both MUST be strings (if it shouldnt color it needs to be empty)
-    -- you shouldnt worry bout that if your using the dedicated function get_colors_from_coloring
-    -- create a spetial highlight for each color
+    -- Both must be strings (leave empty if no color is needed).
+    -- You shouldn’t worry about this if you’re using the dedicated function get_colors_from_coloring.
+    -- Create a special highlight for each color.
     local highlight_name = "NeorgColorsFG." .. tostring(colors[1]) .. "BG." .. tostring(colors[2])
     local opts = {}
 
-    -- setting the fg color
+    -- Setting the foreground color
     if colors[1] ~= "" then
       opts.fg = "#" .. colors[1]
     end
 
-    -- setting bg color
+    -- Setting the background color
     if colors[2] ~= "" then
       opts.bg = "#" .. colors[2]
     end
 
     api.nvim_set_hl(0, highlight_name, opts)
 
-    -- set the highlight on the current buffer
+    -- Set the highlight on the current buffer
     vim.hl.range(buf, ns_id, highlight_name, { line_num - 1, 0 }, { line_num - 1, -1 })
   end,
 
@@ -76,38 +73,38 @@ module.private = {
     -- {
     -- color , highlight color
     -- }
-    -- both MUST be strings (if it shouldnt color it needs to be empty)
-    -- you shouldnt worry bout that if your using the dedicated function get_colors_from_coloring
+    -- Both must be strings (leave empty if no color is needed).
+    -- You shouldn’t worry about this if you’re using the dedicated function get_colors_from_coloring.
     if not line_num or not buf or not colors then
       return false
     end
 
-    -- find the text in the line so we can color&highlight until the text is found
-    -- if not found the text raise an error
-    -- create a spetial highlight for each color
+    -- Find the text in the line so we can color & highlight until the text is found.
+    -- If the text is not found, raise an error.
+    -- Create a special highlight for each color.
 
     local highlight_name = "NeorgColorsFG." .. tostring(colors[1]) .. "BG." .. tostring(colors[2])
     local opts = {}
 
-    -- setting the fg color
+    -- Create a special highlight for each color.
     if colors[1] ~= "" then
       opts.fg = "#" .. colors[1]
     end
 
-    -- setting bg color
+    -- Setting the background color
     if colors[2] ~= "" then
       opts.bg = "#" .. colors[2]
     end
 
     api.nvim_set_hl(0, highlight_name, opts)
 
-    -- set the highlight on the current buffer
+    -- Set the highlight on the current buffer
     vim.hl.range(buf, ns_id, highlight_name, { line_num - 1, start_offset }, { line_num - 1, end_offset })
   end,
 
   -- a function that hides a word/part of a line
   conceal_on_line = function(buf, line_num, start_offset, end_offset, ns_id)
-    --- concealing the word/s inside the start_offset and end_offset in line
+    --- Concealing the word(s) between the start_offset and end_offset in the line
     if not line_num or not buf then
       return false
     end
@@ -115,28 +112,28 @@ module.private = {
     start_offset = start_offset or 0
     end_offset = end_offset or 0
 
-    -- hiding the specified area
+    -- Hiding the specified area
     api.nvim_buf_set_extmark(buf, ns_id, line_num - 1, start_offset, {
       end_col = end_offset,
       conceal = "",
     })
   end,
   scan_line_and_update = function(buf, line, line_number, coloring, offset, continue, ns_id)
-    -- NOTE: this is a recursive function, it will call itself in current line until it stopped coloring
-    --       it will cut the line when it doesnt find a match
+    -- NOTE: This is a recursive function that calls itself repeatedly on the current line until coloring is complete
+    --       It truncates the line when no match is found
     --       returns: coloring
 
-    -- some constants
+    -- Several constants
 
     local COLOR_NAME = module.config.public.color_name
     COLOR_NAME = module.private.escape_lua_pattern(COLOR_NAME)
     local END_NAME = module.config.public.end_name
     END_NAME = module.private.escape_lua_pattern(END_NAME)
 
-    -- it will be added to the next line recorsion
+    -- It will be added in the next recursion step for the line.
     local exta_col_len = 0
 
-    -- case mach all current possibilities (see if they exsist)
+    -- Match all current possibilities (ensure they exist)
     local start_coloring = string.match(line, COLOR_NAME .. "#(%x%x%x%x%x%x)")
     local start_highlighting = string.match(line, COLOR_NAME .. "[#%x%x%x%x%x%x]+,#(%x%x%x%x%x%x)")
     local end_coloring = string.match(line, END_NAME)
@@ -144,15 +141,15 @@ module.private = {
       api.nvim_buf_clear_namespace(buf, ns_id, line_number, line_number + 1)
     end
 
-    -- set the line color if &color
+    -- Set the line color if &color is set.
     if start_coloring then
       exta_col_len = string.len(COLOR_NAME)
 
-      -- set coloring = true and the color
+      -- Set coloring = true and set the color.
       coloring[1] = true
       coloring[2] = start_coloring
 
-      -- set highlight and set highlighting to true
+      -- Set the highlight and set highlighting to true.
       -- NOTE: color[3] and color[4] is for highlighing
 
       if start_highlighting then
@@ -165,18 +162,18 @@ module.private = {
       end
       local color_start_idx, color_end_idx = string.find(line, COLOR_NAME, 0)
 
-      -- conceal the &color property
+      -- Conceal the &color property
       module.private.conceal_on_line(
         buf,
         line_number,
         color_start_idx + offset - 1,
-        color_end_idx + offset + exta_col_len, -- color_end_idx is the last letter in the &color: property in the line
-        -- offset is the offset that the line starts from
-        -- exta_col_len is the added hex color to the &color
+        color_end_idx + offset + exta_col_len, -- color_end_idx is the index of the last character in the &color: property on the line
+        -- offset is the starting offset of the line
+        -- exta_col_len is the length of the hex color appended to &color
         ns_id
       )
 
-      -- using recursion to fing the next string in line (yes.. i didnt belive it too, who knew? recursion has uses irl)
+      -- Using recursion to find the next string in the line (yeah… I didn’t believe it either — who knew recursion is useful IRL?)
       local call_itself = function()
         return module.private.scan_line_and_update(
           buf,
@@ -187,16 +184,16 @@ module.private = {
           continue,
           ns_id
         )
-        -- lookes like that:
-        -- if i have a &color:#ffffff property
-        -- offset will be now 11(length till the &color)+7(length of &color:) = 18
-        -- and the text will look like that: ffffff property
+        -- Looks like this:
+        -- If I have a &color:#ffffff property,
+        -- offset will now be 11 (length up to &color) + 7 (length of &color:) = 18,
+        -- and the text will look like this: ffffff property
       end
 
-      -- if theres an &end_color tag in the future call the function again with the string cut till the end of the &color
+      -- If there’s an &end_color tag ahead, call the function again with the substring up to the end of &color
       if end_coloring then
-        -- find the &end_color property
-        -- notify("found &end_color on line " .. line_number .. "," .. offset)
+        -- Find the &end_color property
+        -- notify("Found &end_color on line " .. line_number .. "," .. offset)
         local end_start_idx, end_end_idx = string.find(line, END_NAME, 0)
 
         module.private.color_in_line(
@@ -209,7 +206,7 @@ module.private = {
         )
         return call_itself()
       else
-        -- find the next &color to know where to start next
+        -- Find the next &color to determine where to start next
         local next_color_start_idx, next_color_end_idx = string.find(string.sub(line, color_end_idx + 0), COLOR_NAME, 0)
         if next_color_end_idx == nil or next_color_start_idx == nil then
           module.private.color_in_line(
@@ -223,14 +220,14 @@ module.private = {
           continue = true
           return call_itself()
         else
-          -- color until next color
+          -- Color until the next color
 
           module.private.color_in_line(
             module.private.get_colors_from_coloring(coloring),
             buf,
             line_number,
-            color_end_idx + offset, -- starting from this color
-            offset + next_color_end_idx, -- till the next color that has been found
+            color_end_idx + offset, -- Starting from this color
+            offset + next_color_end_idx, -- up to the next detected color
 
             ns_id
           )
@@ -245,15 +242,15 @@ module.private = {
         buf,
         line_number,
         start_idx + offset - 1,
-        end_idx + offset + exta_col_len, -- color_end_idx is the last letter in the &color: property in the line
-        -- offset is the offset that the line starts from
-        -- exta_col_len is the added hex color to the &color
+        end_idx + offset + exta_col_len, -- end_idx is the index of the last character in the &color: property on the line
+        -- offset is the line’s starting offset
+        -- exta_col_len is the length of the hex color appended to &color
         ns_id
       )
       coloring[1] = false
       coloring[2] = "000000"
       if start_coloring then
-        -- if it needs coloring it will color from the offset to the start of &end_color
+        -- If coloring is needed, color from the offset to the start of &end_color
         return module.private.scan_line_and_update(
           buf,
           string.sub(line, end_idx + 0),
@@ -261,9 +258,8 @@ module.private = {
           coloring,
           offset + end_idx
         )
-
       end
-      -- if theres an &color: tag in the future call the function again with the string cut till the end of the &end_color
+      -- If there’s an &color: tag ahead, call the function again with the string cut until the end of &end_color.
     else
       continue = true
 
@@ -285,16 +281,16 @@ module.private = {
     -- Get the lines in the buffer
     local lines = api.nvim_buf_get_lines(buf, 0, -1, false)
     local coloring = {
-      false, "ffffff",       -- text color
-      false, "000000"        -- highlight color
-
+      false,
+      "ffffff", -- text color
+      false,
+      "000000", -- highlight color
     }
     local continue = false
     -- Iterate over each line
     for line_number, line in ipairs(lines) do
-      -- if the line does not contain the all other color properties remove its namespace
-      -- NOTE: i think this can conflict with other plugins
-      -- mabe i need to try and find another solution
+      -- If the line doesn’t contain all the other color properties, remove its namespace.
+      -- NOTE: This might conflict with other plugins. Maybe I should find another solution.
       continue, coloring = module.private.scan_line_and_update(buf, line, line_number, coloring, 0, continue, ns_id)
       if coloring[1] then
         if continue then
@@ -304,9 +300,7 @@ module.private = {
         end
       end
     end
-
   end,
-
 }
 
 module.load = function()
@@ -315,7 +309,7 @@ module.load = function()
   api.nvim_create_autocmd({ "BufEnter", "BufNew", "TextChanged", "TextChangedI" }, {
     pattern = { "*.norg" },
     callback = function()
-      local buf = api.nvim_get_current_buf() -- Buffer actuel
+      local buf = api.nvim_get_current_buf()
       module.private.scan_lines_and_update(buf, ns_id)
     end,
   })
