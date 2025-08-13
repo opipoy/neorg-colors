@@ -128,13 +128,12 @@ module.private = {
     })
   end,
 
-  scan_line_and_update = function(buf, line, line_number, coloring, offset, continue, ns_id)
+  scan_line_and_update = function(buf, line, line_number, coloring, offset, ns_id)
     -- NOTE: This is a recursive function that calls itself repeatedly on the current line until coloring is complete
     --       It truncates the line when no match is found
     --       returns: coloring
 
     -- Several constants
-
     local COLOR_NAME = module.config.private.COLOR_NAME
     local END_NAME = module.config.private.END_NAME
 
@@ -191,7 +190,6 @@ module.private = {
           line_number,
           coloring,
           offset + color_end_idx - 1,
-          continue,
           ns_id
         )
         -- Looks like this:
@@ -228,22 +226,18 @@ module.private = {
             -1,
             ns_id
           )
-          continue = true
 
           return call_itself()
         else
           -- Color until the next color
-
           module.private.color_in_line(
             module.private.get_colors_from_coloring(coloring),
             buf,
             line_number,
             color_end_idx + offset, -- Starting from this color
             offset + next_color_end_idx, -- up to the next detected color
-
             ns_id
           )
-          continue = true
 
           return call_itself()
         end
@@ -260,8 +254,10 @@ module.private = {
         -- exta_col_len is the length of the hex color appended to &color
         ns_id
       )
+
       coloring[1] = false
       coloring[2] = "000000"
+      
       if start_coloring then
         -- If coloring is needed, color from the offset to the start of &end_color
         return module.private.scan_line_and_update(
@@ -274,8 +270,6 @@ module.private = {
       end
       -- If there’s an &color: tag ahead, call the function again with the string cut until the end of &end_color.
     else
-      continue = true
-
       if coloring[1] then
         module.private.color_in_line(
           module.private.get_colors_from_coloring(coloring),
@@ -288,7 +282,7 @@ module.private = {
       end
     end
 
-    return continue, coloring
+    return coloring
   end,
 
   scan_lines_and_update = function(buf, ns_id)
@@ -300,19 +294,15 @@ module.private = {
       false,
       "000000", -- highlight color
     }
-    local continue = false
 
     -- Iterate over each line
     for line_number, line in ipairs(lines) do
       -- If the line doesn’t contain all the other color properties, remove its namespace.
       -- NOTE: This might conflict with other plugins. Maybe I should find another solution.
-      continue, coloring = module.private.scan_line_and_update(buf, line, line_number, coloring, 0, continue, ns_id)
-      if coloring[1] then
-        if continue then
-          continue = false
-        else
+      coloring = module.private.scan_line_and_update(buf, line, line_number, coloring, 0, ns_id)
+
+      if coloring[1] and not string.match(line, module.config.private.END_NAME) then
           module.private.color_line(module.private.get_colors_from_coloring(coloring), buf, line_number, ns_id)
-        end
       end
     end
   end,
