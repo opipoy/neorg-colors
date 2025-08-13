@@ -51,6 +51,23 @@ module.private = {
     return { coloring[2] or "", coloring[4] or "" }
   end,
 
+  create_highlight_opts = function(colors)
+    local highlight_name = "NeorgColorsFG." .. tostring(colors[1]) .. "BG." .. tostring(colors[2])
+    local opts = {}
+
+    if colors[1] ~= "" then
+      opts.fg = "#" .. colors[1]
+    end
+
+    if colors[2] ~= "" then
+      opts.bg = "#" .. colors[2]
+    end
+
+    api.nvim_set_hl(0, highlight_name, opts)
+
+    return highlight_name
+  end,
+
   -- A function created to color a whole line
   color_line = function(colors, buf, line_num, ns_id)
     -- colors structure:
@@ -60,22 +77,8 @@ module.private = {
     -- Both must be strings (leave empty if no color is needed).
     -- You shouldn’t worry about this if you’re using the dedicated function get_colors_from_coloring.
     -- Create a special highlight for each color.
-    local highlight_name = "NeorgColorsFG." .. tostring(colors[1]) .. "BG." .. tostring(colors[2])
-    local opts = {}
+    local highlight_name = module.private.create_highlight_opts(colors)
 
-    -- Setting the foreground color
-    if colors[1] ~= "" then
-      opts.fg = "#" .. colors[1]
-    end
-
-    -- Setting the background color
-    if colors[2] ~= "" then
-      opts.bg = "#" .. colors[2]
-    end
-
-    api.nvim_set_hl(0, highlight_name, opts)
-
-    -- Set the highlight on the current buffer
     vim.hl.range(buf, ns_id, highlight_name, { line_num - 1, 0 }, { line_num - 1, -1 })
   end,
 
@@ -94,23 +97,8 @@ module.private = {
     -- Find the text in the line so we can color & highlight until the text is found.
     -- If the text is not found, raise an error.
     -- Create a special highlight for each color.
+    local highlight_name = module.private.create_highlight_opts(colors)
 
-    local highlight_name = "NeorgColorsFG." .. tostring(colors[1]) .. "BG." .. tostring(colors[2])
-    local opts = {}
-
-    -- Create a special highlight for each color.
-    if colors[1] ~= "" then
-      opts.fg = "#" .. colors[1]
-    end
-
-    -- Setting the background color
-    if colors[2] ~= "" then
-      opts.bg = "#" .. colors[2]
-    end
-
-    api.nvim_set_hl(0, highlight_name, opts)
-
-    -- Set the highlight on the current buffer
     vim.hl.range(buf, ns_id, highlight_name, { line_num - 1, start_offset }, { line_num - 1, end_offset })
   end,
 
