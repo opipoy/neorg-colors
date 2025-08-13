@@ -255,9 +255,21 @@ module.private = {
         ns_id
       )
 
+      -- Color until reaching &end_color
+      if coloring[1] then
+        module.private.color_in_line(
+          module.private.get_colors_from_coloring(coloring),
+          buf,
+          line_number,
+          offset,
+          start_idx + offset - 1,
+          ns_id
+        )
+      end
+
       coloring[1] = false
       coloring[2] = "000000"
-      
+
       if start_coloring then
         -- If coloring is needed, color from the offset to the start of &end_color
         return module.private.scan_line_and_update(
@@ -301,8 +313,8 @@ module.private = {
       -- NOTE: This might conflict with other plugins. Maybe I should find another solution.
       coloring = module.private.scan_line_and_update(buf, line, line_number, coloring, 0, ns_id)
 
-      if coloring[1] and not string.match(line, module.config.private.END_NAME) then
-          module.private.color_line(module.private.get_colors_from_coloring(coloring), buf, line_number, ns_id)
+      if coloring[1] then
+        module.private.color_line(module.private.get_colors_from_coloring(coloring), buf, line_number, ns_id)
       end
     end
   end,
