@@ -48,10 +48,7 @@ module.private = {
       return nil
     end
 
-    local color = coloring[1] and coloring[2] or ""
-    local highlight = coloring[3] and coloring[4] or ""
-
-    return { color, highlight }
+    return { coloring[2] or "", coloring[4] or "" }
   end,
 
   -- A function created to color a whole line
