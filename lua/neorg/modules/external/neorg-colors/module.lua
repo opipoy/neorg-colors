@@ -5,8 +5,14 @@ local module = neorg.modules.create "external.neorg-colors"
 local api = vim.api
 
 module.config.public = {
-  color_name = "ncolor:",
+  color_name = "ncolor",
   end_name = "nend_color",
+}
+
+module.config.private = {
+  COLOR_SEPARATOR = ":",
+  COLOR_NAME = nil,
+  END_NAME = nil,
 }
 
 module.private = {
@@ -26,6 +32,7 @@ module.private = {
       ["-"] = "%-",
       ["?"] = "%?",
     }
+
     return (s:gsub(".", matches))
   end,
 
@@ -34,8 +41,10 @@ module.private = {
       vim.error "entered coloring len is not 4"
       return nil
     end
+
     local color = coloring[1] and coloring[2] or ""
     local highlight = coloring[3] and coloring[4] or ""
+
     return { color, highlight }
   end,
 
@@ -118,6 +127,7 @@ module.private = {
       conceal = "",
     })
   end,
+
   scan_line_and_update = function(buf, line, line_number, coloring, offset, continue, ns_id)
     -- NOTE: This is a recursive function that calls itself repeatedly on the current line until coloring is complete
     --       It truncates the line when no match is found
@@ -125,10 +135,8 @@ module.private = {
 
     -- Several constants
 
-    local COLOR_NAME = module.config.public.color_name
-    COLOR_NAME = module.private.escape_lua_pattern(COLOR_NAME)
-    local END_NAME = module.config.public.end_name
-    END_NAME = module.private.escape_lua_pattern(END_NAME)
+    local COLOR_NAME = module.config.private.COLOR_NAME
+    local END_NAME = module.config.private.END_NAME
 
     -- It will be added in the next recursion step for the line.
     local exta_col_len = 0
@@ -137,6 +145,7 @@ module.private = {
     local start_coloring = string.match(line, COLOR_NAME .. "#(%x%x%x%x%x%x)")
     local start_highlighting = string.match(line, COLOR_NAME .. "[#%x%x%x%x%x%x]+,#(%x%x%x%x%x%x)")
     local end_coloring = string.match(line, END_NAME)
+
     if offset == 0 then
       api.nvim_buf_clear_namespace(buf, ns_id, line_number, line_number + 1)
     end
@@ -160,6 +169,7 @@ module.private = {
         coloring[3] = false
         coloring[4] = ""
       end
+
       local color_start_idx, color_end_idx = string.find(line, COLOR_NAME, 0)
 
       -- Conceal the &color property
@@ -204,6 +214,7 @@ module.private = {
           offset + end_start_idx - 1,
           ns_id
         )
+
         return call_itself()
       else
         -- Find the next &color to determine where to start next
@@ -218,6 +229,7 @@ module.private = {
             ns_id
           )
           continue = true
+
           return call_itself()
         else
           -- Color until the next color
@@ -232,6 +244,7 @@ module.private = {
             ns_id
           )
           continue = true
+
           return call_itself()
         end
       end
@@ -274,6 +287,7 @@ module.private = {
         )
       end
     end
+
     return continue, coloring
   end,
 
@@ -287,6 +301,7 @@ module.private = {
       "000000", -- highlight color
     }
     local continue = false
+
     -- Iterate over each line
     for line_number, line in ipairs(lines) do
       -- If the line doesn’t contain all the other color properties, remove its namespace.
@@ -305,6 +320,10 @@ module.private = {
 
 module.load = function()
   local ns_id = api.nvim_create_namespace "neorg-colors-namespace"
+
+  module.config.private.COLOR_NAME = module.private.escape_lua_pattern(module.config.public.color_name)
+    .. module.config.private.COLOR_SEPARATOR
+  module.config.private.END_NAME = module.private.escape_lua_pattern(module.config.public.end_name)
 
   api.nvim_create_autocmd({ "BufEnter", "BufNew", "TextChanged", "TextChangedI" }, {
     pattern = { "*.norg" },
