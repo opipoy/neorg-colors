@@ -328,8 +328,9 @@ module.private = {
 
       return call_itself(color_end_idx)
     elseif end_coloring then
+      local end_idx = module.private.process_end_color_tag(buf, line, line_number, coloring, offset, END_NAME, ns_id)
+
       if start_coloring then
-        local end_idx = module.private.process_end_color_tag(buf, line, line_number, coloring, offset, END_NAME, ns_id)
         -- If coloring is needed, color from the offset to the start of &end_color
         return call_itself(end_idx)
       end
